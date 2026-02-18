@@ -8,76 +8,81 @@
 <div class="game-screen">
     <div class="layout-wrapper">
         <div class="board-area @((!Game.GameStarted || Game.GameEnded) ? "dimmed" : "")">
-            
-            <!-- AI SECTION -->
-            <div class="opponent-row">
-                <div style="width: fit-content; margin: 0 auto; position: relative;">
-                   <div class="status-badge ai-badge @(Game.CurrentTurn == TurnOwner.AI ? "thinking-glow" : "")">
-                        @if (Game.CurrentTurn == TurnOwner.AI)
-                        {
-                            <span class="pulse-dot">●</span> <span>AI IS THINKING...</span>
-                        }
-                        else
-                        {
-                            <span>AI WAITING</span>
-                        }
-                        <span class="badge-separator">|</span>
-                        <span>CARDS: @Game.AI.Hand.Count</span>
-                    </div>
-                    <div class="@(Game.CurrentTurn == TurnOwner.AI ? "active-turn-glow" : "")" style="border-radius: 12px;">
-                        <PlayerBoard State="Game.AI" IsSmall="false" />
-                    </div>
-                </div>
-            </div>
-
-            <!-- TABLE CENTER -->
-            <div class="center-row">
-                <div class="deck-slot" @onclick="HandleDraw">
-                    @if (Game.Deck.Count > 0)
-                    {
-                        <div class="card-face draw-pile-back deck-stack" style="@GetStackStyle(Game.Deck.Count)">
-                            <div style="text-align: center;"><small>DECK</small><br />@Game.Deck.Count</div>
-                        </div>
-                    }
-                </div>
-                <div class="deck-slot">
-                    @if (Game.DiscardPile.Any())
-                    {
-                        <div class="card-face deck-stack" style="@GetStackStyle(Game.DiscardPile.Count)">
-                            @Game.DiscardPile.Last().Name
-                        </div>
-                    }
-                </div>
-            </div>
-
-            <!-- PLAYER SECTION -->
-            <div class="player-row">
-                <div class="@(Game.CurrentTurn == TurnOwner.Player ? "active-turn-glow" : "")" style="margin: 0 auto; border-radius: 12px;">
-                    <!--<div class="controls-bar" style="margin-bottom: 0; border-radius: 8px 8px 0 0;">
-                        <div class="turn-indicator">
-                            @(Game.CurrentTurn == TurnOwner.Player ? "YOUR TURN" : "AI IS THINKING...") - <strong>@Game.CurrentPhase</strong>
-                        </div>
-                    </div>-->
-
-                    <PlayerBoard State="Game.Player" IsSmall="false" />
-                </div>
-                <div class="hand-container">
-                    @foreach (var card in Game.Player.Hand)
-                    {
-                        <div class="hand-card-wrapper">
-                            <div class="card-face hand-card">@card.Name</div>
-                            @if (Game.CurrentTurn == TurnOwner.Player && Game.CurrentPhase == TurnPhase.Play)
+            <div class="centered-content-wrapper">
+                <!-- AI SECTION -->
+                <div class="opponent-row">
+                    <div style="width: fit-content; margin: 0 auto; position: relative;">
+                       <div class="status-badge ai-badge @(Game.CurrentTurn == TurnOwner.AI ? "thinking-glow" : "")">
+                            @if (Game.CurrentTurn == TurnOwner.AI)
                             {
-                                <div class="card-actions-overlay">
-                                    <button class="btn-action btn-play" @onclick="() => HandlePlay(card)">PLAY</button>
-                                    <button class="btn-action btn-discard" @onclick="() => HandleDiscard(card)">DISCARD</button>
-                                </div>
+                                <span class="pulse-dot">●</span> <span>AI IS THINKING...</span>
                             }
+                            else
+                            {
+                                <span>AI WAITING</span>
+                            }
+                            <span class="badge-separator">|</span>
+                            <span>CARDS: @Game.AI.Hand.Count</span>
                         </div>
-                    }
+                        <div class="@(Game.CurrentTurn == TurnOwner.AI ? "active-turn-glow" : "")" style="border-radius: 12px;">
+                            <PlayerBoard State="Game.AI" IsSmall="false" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TABLE CENTER -->
+                <div class="center-row">
+                    <div class="deck-slot" @onclick="HandleDraw">
+                        @if (Game.Deck.Count > 0)
+                        {
+                            <div class="card-face draw-pile-back deck-stack" style="@GetStackStyle(Game.Deck.Count)">
+                                <div style="text-align: center;"><small>DECK</small><br />@Game.Deck.Count</div>
+                            </div>
+                        }
+                    </div>
+                    <div class="deck-slot">
+                        @if (Game.DiscardPile.Any())
+                        {
+                            <div class="card-face deck-stack" style="@GetStackStyle(Game.DiscardPile.Count)">
+                                @Game.DiscardPile.Last().Name
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- PLAYER SECTION -->
+                <div class="player-row">
+                    <div class="@(Game.CurrentTurn == TurnOwner.Player ? "active-turn-glow" : "")" style="margin: 0 auto; border-radius: 12px;">
+                        <!--<div class="controls-bar" style="margin-bottom: 0; border-radius: 8px 8px 0 0;">
+                            <div class="turn-indicator">
+                                @(Game.CurrentTurn == TurnOwner.Player ? "YOUR TURN" : "AI IS THINKING...") - <strong>@Game.CurrentPhase</strong>
+                            </div>
+                        </div>-->
+
+                        <PlayerBoard State="Game.Player" IsSmall="false" />
+                    </div>
+                    <div class="hand-container">
+                        @foreach (var card in Game.Player.Hand)
+                        {
+                            <div class="hand-card-wrapper">
+                                <div class="card-face hand-card">@card.Name</div>
+                                @if (Game.CurrentTurn == TurnOwner.Player && Game.CurrentPhase == TurnPhase.Play)
+                                {
+                                    <div class="card-actions-overlay">
+                                        <button class="btn-action btn-play" @onclick="() => HandlePlay(card)">PLAY</button>
+                                        <button class="btn-action btn-discard" @onclick="() => HandleDiscard(card)">DISCARD</button>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
+
+        <DistanceTrack 
+            PlayerDistance="Game.Player.TotalDistance" 
+            AIDistance="Game.AI.TotalDistance" />
 
         <!-- SIDEBAR LOG -->
         <GameLog Entries="Game.Logs" />
@@ -158,6 +163,7 @@
     {
         Game.Player.TotalScore = 0;
         Game.AI.TotalScore = 0;
+        Game.ResetMatchStarter();
         Game.StartNewGame();
     }
 

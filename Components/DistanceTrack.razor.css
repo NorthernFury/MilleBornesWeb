@@ -1,0 +1,90 @@
+﻿.race-track-container {
+    width: 110px;
+    height: 100%;
+    background: #2c3e50;
+    border-left: 2px solid #34495e;
+    border-right: 2px solid #34495e;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+.road {
+    position: relative;
+    flex-grow: 1;
+    width: 90px;
+    background: #1a1a1a; /* Asphalt */
+    border-left: 2px solid #fff;
+    border-right: 2px solid #fff;
+    margin: 10px 0;
+}
+
+.lane-divider {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 0px;
+    border-left: 2px dashed rgba(255,255,255,0.3);
+    transform: translateX(-50%);
+}
+
+.car-wrapper {
+    position: absolute;
+    width: 45px; /* Half of the road width */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: bottom 1s ease-in-out;
+    z-index: 5;
+}
+
+/* Horizontal positioning for lanes */
+.player-lane {
+    left: 0;
+    color: #2ecc71;
+}
+
+.ai-lane {
+    right: 0;
+    color: #e74c3c;
+}
+
+.car-svg {
+    width: 30px; /* Physical size of the car */
+    height: 60px;
+    filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5));
+}
+
+.car-label {
+    font-size: 0.6rem;
+    font-weight: bold;
+    font-family: sans-serif;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 1px 4px;
+    border-radius: 3px;
+    margin-top: 2px;
+    white-space: nowrap;
+}
+
+.finish-line {
+    font-weight: bold;
+    font-size: 0.8rem;
+    color: rgb(0, 0, 0);
+    background: rgb(255, 255, 255);
+    padding: 4px 8px;
+    border-radius: 4px;
+    width: 90%;
+    text-align: center;
+}
+
+.start-line {
+    font-weight: bold;
+    font-size: 0.7rem;
+    color: #95a5a6;
+}

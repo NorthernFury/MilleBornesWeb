@@ -23,6 +23,8 @@ public class GameManager
 
     public TurnOwner CurrentTurn { get; private set; } = TurnOwner.Player;
     public TurnPhase CurrentPhase { get; private set; } = TurnPhase.Draw;
+    private TurnOwner? _lastRoundStarter;
+
     public bool GameStarted { get; private set; } = false;
 
     public bool GameEnded { get; private set; } = false;
@@ -34,7 +36,6 @@ public class GameManager
     public void StartNewGame()
     {
         Logs.Clear();
-        AddLog("A new round has begun!", TurnOwner.Player);
 
         BuildDeck();
         ShuffleDeck();
@@ -43,7 +44,22 @@ public class GameManager
 
         MatchEnded = false;
 
-        CurrentTurn = TurnOwner.Player;
+        if (_lastRoundStarter == null)
+        {
+            // First round of a new match: Random selection
+            CurrentTurn = _rng.Next(2) == 0 ? TurnOwner.Player : TurnOwner.AI;
+            AddLog($"Match Start! {(CurrentTurn == TurnOwner.Player ? "You were" : "AI was")} randomly selected to start.", TurnOwner.Player);
+        }
+        else
+        {
+            // Subsequent rounds: Alternate
+            CurrentTurn = (_lastRoundStarter == TurnOwner.Player) ? TurnOwner.AI : TurnOwner.Player;
+            AddLog($"New Round! It is {(CurrentTurn == TurnOwner.Player ? "your" : "AI's")} turn to start.", CurrentTurn);
+        }
+
+        // Save who started this round for the next one
+        _lastRoundStarter = CurrentTurn;
+
         CurrentPhase = TurnPhase.Draw;
         GameEnded = false;
         GameStarted = true;
@@ -53,7 +69,13 @@ public class GameManager
             MoveCardFromDeckToHand(Player);
             MoveCardFromDeckToHand(AI);
         }
+
         NotifyStateChanged();
+
+        if (CurrentTurn == TurnOwner.AI)
+        {
+            _ = _aiService.ThinkAndPlay(this);
+        }
     }
 
     public void DrawCard(PlayerState player)
@@ -343,6 +365,11 @@ public class GameManager
         }
 
         return score;
+    }
+
+    public void ResetMatchStarter()
+    {
+        _lastRoundStarter = null;
     }
 
     public void AddLog(string message, TurnOwner owner)
