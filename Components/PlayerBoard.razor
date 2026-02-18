@@ -1,0 +1,63 @@
+﻿@using MilleBornesWeb.Models
+
+<div class="play-area @(IsSmall ? "small-scale" : "")">
+    
+    <!-- Safety Area -->
+    <div class="safety-box">
+        <div class="label-text">Safety Area</div>
+        <div class="safety-list">
+            @foreach (var s in State.SafetyArea)
+            {
+                <div class="card-mini">@s.Name</div>
+            }
+        </div>
+    </div>
+
+    <!-- Speed Pile -->
+    <div class="card-container">
+        <div class="card-slot">
+            @if (State.SpeedPile.Any())
+            {
+                <div class="card-face">@State.SpeedPile.Last().Name</div>
+            }
+        </div>
+        <div class="label-text">Speed Pile</div>
+    </div>
+
+    <!-- Battle Pile -->
+    <div class="card-container">
+        <div class="card-slot">
+            @if (State.BattlePile.Any())
+            {
+                <div class="card-face">@State.BattlePile.Last().Name</div>
+            }
+        </div>
+        <div class="label-text">Battle Pile</div>
+    </div>
+
+    <!-- Distance Area -->
+    <div class="distance-area">
+        <!-- Keep this in its own block to prevent overlap -->
+        <div class="distance-header">
+            <div class="label-text">DISTANCE: @State.TotalDistance KM</div>
+        </div>
+
+        <div class="distance-columns-container">
+            @foreach (var group in State.DistanceCards.GroupBy(x => x.Value).OrderByDescending(g => g.Key))
+            {
+                <div class="distance-stack">
+                    @foreach (var card in group)
+                    {
+                        @* We display the value, and the CSS will handle the downward stack *@
+                        <div class="card-face distance-overlap">@card.Value</div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public PlayerState State { get; set; } = new();
+    [Parameter] public bool IsSmall { get; set; } = false;
+}

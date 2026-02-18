@@ -1,0 +1,66 @@
+﻿@using MilleBornesWeb.Models
+@using MilleBornesWeb.Services
+
+<div class="overlay">
+    <div class="menu-card scoring-card">
+        <h1>Round Complete!</h1>
+        <div class="score-grid">
+            <div class="grid-header">&nbsp;</div>
+            <div class="grid-header">YOU</div>
+            <div class="grid-header">AI</div>
+
+            <!-- Standard Rows -->
+            <div>Distance</div>
+            <div>@Player.TotalDistance</div>
+            <div>@AI.TotalDistance</div>
+
+            <div>Safeties (@Player.SafetyArea.Count vs @AI.SafetyArea.Count)</div>
+            <div>+ @(Player.SafetyArea.Count * 100)</div>
+            <div>+ @(AI.SafetyArea.Count * 100)</div>
+
+            <!-- Conditional Bonus Rows -->
+            @renderBonusRow("Coup Fourrés", Player.CoupFourreCount * 300, AI.CoupFourreCount * 300)
+            @renderBonusRow("Trip Completed", (Player.TotalDistance == 1000 ? 400 : 0), (AI.TotalDistance == 1000 ? 400 : 0))
+            @renderBonusRow("Shutout Bonus", CalculateShutout(Player), CalculateShutout(AI))
+            @renderBonusRow("Safe Trip (No 200km)", CalculateSafeTrip(Player), CalculateSafeTrip(AI))
+
+            <hr style="grid-column: span 3; width: 100%; border: 1px solid #ccc;" />
+
+            <div class="round-total-label">Round Total</div>
+            <div class="round-total-val">@RoundScorePlayer</div>
+            <div class="round-total-val">@RoundScoreAI</div>
+
+            <div class="grand-total-row">NEW TOTAL</div>
+            <div class="grand-total-row">@(Player.TotalScore + RoundScorePlayer)</div>
+            <div class="grand-total-row">@(AI.TotalScore + RoundScoreAI)</div>
+        </div>
+
+        <button class="btn-main" @onclick="OnNextRound">NEXT ROUND</button>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public PlayerState Player { get; set; } = default!;
+    [Parameter, EditorRequired] public PlayerState AI { get; set; } = default!;
+    [Parameter, EditorRequired] public int RoundScorePlayer { get; set; }
+    [Parameter, EditorRequired] public int RoundScoreAI { get; set; }
+    [Parameter] public EventCallback OnNextRound { get; set; }
+
+    // Logic for specific bonuses to keep HTML clean
+    private int CalculateShutout(PlayerState actor) =>
+        (actor.TotalDistance == 1000 && (actor == Player ? AI : Player).TotalDistance == 0) ? 500 : 0;
+
+    private int CalculateSafeTrip(PlayerState actor) =>
+        (actor.TotalDistance == 1000 && !actor.DistanceCards.Any(d => d.Name == "200km")) ? 300 : 0;
+
+    // Helper to only render a row if at least one player has points in it
+    private RenderFragment renderBonusRow(string label, int pVal, int aVal) => __builder =>
+    {
+        if (pVal > 0 || aVal > 0)
+        {
+            <div class="bonus-label">@label</div>
+            <div>@(pVal > 0 ? $"+ {pVal}" : "0")</div>
+            <div>@(aVal > 0 ? $"+ {aVal}" : "0")</div>
+        }
+    };
+}

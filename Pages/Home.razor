@@ -1,0 +1,232 @@
+﻿@page "/"
+@using MilleBornesWeb.Models
+@using MilleBornesWeb.Services
+@using MilleBornesWeb.Components
+@inject GameManager Game
+@implements IDisposable
+
+<div class="game-screen">
+    <div class="layout-wrapper">
+        <div class="board-area @((!Game.GameStarted || Game.GameEnded) ? "dimmed" : "")">
+            
+            <!-- AI SECTION -->
+            <div class="opponent-row">
+                <div style="width: fit-content; margin: 0 auto; position: relative;">
+                   <div class="status-badge ai-badge @(Game.CurrentTurn == TurnOwner.AI ? "thinking-glow" : "")">
+                        @if (Game.CurrentTurn == TurnOwner.AI)
+                        {
+                            <span class="pulse-dot">●</span> <span>AI IS THINKING...</span>
+                        }
+                        else
+                        {
+                            <span>AI WAITING</span>
+                        }
+                        <span class="badge-separator">|</span>
+                        <span>CARDS: @Game.AI.Hand.Count</span>
+                    </div>
+                    <div class="@(Game.CurrentTurn == TurnOwner.AI ? "active-turn-glow" : "")" style="border-radius: 12px;">
+                        <PlayerBoard State="Game.AI" IsSmall="false" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABLE CENTER -->
+            <div class="center-row">
+                <div class="deck-slot" @onclick="HandleDraw">
+                    @if (Game.Deck.Count > 0)
+                    {
+                        <div class="card-face draw-pile-back deck-stack" style="@GetStackStyle(Game.Deck.Count)">
+                            <div style="text-align: center;"><small>DECK</small><br />@Game.Deck.Count</div>
+                        </div>
+                    }
+                </div>
+                <div class="deck-slot">
+                    @if (Game.DiscardPile.Any())
+                    {
+                        <div class="card-face deck-stack" style="@GetStackStyle(Game.DiscardPile.Count)">
+                            @Game.DiscardPile.Last().Name
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- PLAYER SECTION -->
+            <div class="player-row">
+                <div class="@(Game.CurrentTurn == TurnOwner.Player ? "active-turn-glow" : "")" style="margin: 0 auto; border-radius: 12px;">
+                    <!--<div class="controls-bar" style="margin-bottom: 0; border-radius: 8px 8px 0 0;">
+                        <div class="turn-indicator">
+                            @(Game.CurrentTurn == TurnOwner.Player ? "YOUR TURN" : "AI IS THINKING...") - <strong>@Game.CurrentPhase</strong>
+                        </div>
+                    </div>-->
+
+                    <PlayerBoard State="Game.Player" IsSmall="false" />
+                </div>
+                <div class="hand-container">
+                    @foreach (var card in Game.Player.Hand)
+                    {
+                        <div class="hand-card-wrapper">
+                            <div class="card-face hand-card">@card.Name</div>
+                            @if (Game.CurrentTurn == TurnOwner.Player && Game.CurrentPhase == TurnPhase.Play)
+                            {
+                                <div class="card-actions-overlay">
+                                    <button class="btn-action btn-play" @onclick="() => HandlePlay(card)">PLAY</button>
+                                    <button class="btn-action btn-discard" @onclick="() => HandleDiscard(card)">DISCARD</button>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- SIDEBAR LOG -->
+        <GameLog Entries="Game.Logs" />
+    </div>
+    @if (!Game.GameStarted)
+    {
+        <div class="overlay">
+            <div class="menu-card">
+                <h1>Mille Bornes</h1>
+                <button class="btn-main" @onclick="Game.StartNewGame">START GAME</button>
+            </div>
+        </div>
+    }
+    else if (Game.GameEnded)
+    {
+        <ScoreOverlay Player="Game.Player"
+                      AI="Game.AI"
+                      RoundScorePlayer="Game.CalculateRoundScore(Game.Player)"
+                      RoundScoreAI="Game.CalculateRoundScore(Game.AI)"
+                      OnNextRound="HandleNextRound" />
+    }
+
+    @if (Game.MatchEnded)
+    {
+        <div class="overlay match-win-overlay">
+            <div class="menu-card victory-card">
+                <div class="crown">👑</div>
+                <h1>GRAND CHAMPION</h1>
+                <h2>@(Game.Player.TotalScore >= 5000 ? "YOU WON THE MATCH!" : "AI WON THE MATCH!")</h2>
+                <div class="final-score-box">
+                    <div>YOUR TOTAL: @Game.Player.TotalScore</div>
+                    <div>AI TOTAL: @Game.AI.TotalScore</div>
+                </div>
+                <button class="btn-main" @onclick="ResetEntireMatch">NEW MATCH</button>
+            </div>
+        </div>
+    }
+
+    <!-- COUP FOURRÉ INTERRUPT OVERLAY -->
+    @if (Game.IsWaitingForCoupFourre && Game.CurrentTurn == TurnOwner.AI)
+    {
+        <div class="coup-fourre-overlay">
+            <div class="cf-content">
+                <h2>COUP FOURRÉ?</h2>
+                <p>The AI played @Game.PendingHazard?.Name on you!</p>
+                <div style="display:flex; gap: 20px;">
+                    <button class="btn-cf" @onclick="() => Game.PlayCoupFourre(Game.Player)">PLAY SAFETY (300 PTS)</button>
+                    <button class="btn-decline" @onclick="() => Game.DeclineCoupFourre(Game.Player)">IGNORE</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private string errorMessage = "";
+
+    protected override void OnInitialized() => Game.OnNotify += StateHasChanged;
+    public void Dispose() => Game.OnNotify -= StateHasChanged;
+
+    private void HandleNextRound()
+    {
+        // Persistence: Update cumulative totals before resetting
+        Game.Player.TotalScore += Game.CalculateRoundScore(Game.Player);
+        Game.AI.TotalScore += Game.CalculateRoundScore(Game.AI);
+        
+        if (Game.Player.TotalScore >= 5000 || Game.AI.TotalScore >= 5000)
+        {
+            Game.CompleteMatch();
+        }
+        else
+        {
+            Game.StartNewGame();
+        }
+    }
+
+    private void ResetEntireMatch()
+    {
+        Game.Player.TotalScore = 0;
+        Game.AI.TotalScore = 0;
+        Game.StartNewGame();
+    }
+
+    private void HandleDraw()
+    {
+        if (Game.CurrentTurn == TurnOwner.Player && Game.CurrentPhase == TurnPhase.Draw)
+        {
+            Game.DrawCard(Game.Player);
+        }
+    }
+
+    private void HandlePlay(Card card)
+    {
+        var target = (card.Type == CardType.Hazard || card.Type == CardType.SpeedLimit) ? Game.AI : Game.Player;
+        MoveResult result = RuleBook.ValidateMove(card, Game.Player, target);
+
+        if (result)
+        {
+            errorMessage = "";
+            Game.AddLog($"You played {card.Name}.", TurnOwner.Player);
+            Game.ExecuteMove(card, Game.Player, target);
+        }
+        else
+        {
+            errorMessage = result.Message;
+        }
+    }
+
+    private void HandleDiscard(Card card)
+    {
+        errorMessage = "";
+        Game.DiscardCard(card, Game.Player);
+    }
+
+    private double GetOffset(int cardCount) => Math.Max(0, cardCount * 0.25);
+
+    private string GetStackStyle(int cardCount)
+    {
+        if (cardCount <= 0) return "display: none;";
+
+        double offset = GetOffset(cardCount);
+        int layers = (int)Math.Ceiling(offset);
+        
+        var shadows = new List<string>();
+        for (int i = 1; i <= layers; i++)
+        {
+            shadows.Add($"{i}px {i}px 0px #bbb");
+        }
+
+        string shadowCss = string.Join(", ", shadows);
+        
+        // This is the magic: Translate the card UP and LEFT
+        // by the same amount the shadow goes DOWN and RIGHT
+        return $"transform: translate(-{offset}px, -{offset}px); box-shadow: {shadowCss};";
+    }
+
+    private string GetStackShadow(int cardCount)
+    {
+        if (cardCount <= 0) return "none";
+        
+        int layers = Math.Max(1, cardCount / 4);
+        var shadows = new List<string>();
+        
+        for (int i = 1; i <= layers; i++)
+        {
+            // Create a "stepped" shadow effect
+            shadows.Add($"{i}px {i}px 0px #bbb");
+        }
+        
+        return string.Join(", ", shadows);
+    }
+}

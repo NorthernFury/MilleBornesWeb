@@ -1,0 +1,19 @@
+﻿@using MilleBornesWeb.Models
+@using MilleBornesWeb.Services
+
+<div class="log-container" id="game-log">
+    <div class="log-header">GAME LOG</div>
+    <div class="log-entries">
+        @foreach (var entry in Entries.AsEnumerable().Reverse())
+        {
+            <div class="log-entry @(entry.Owner == TurnOwner.AI ? "ai-msg" : "player-msg")">
+                <span class="log-time">[@entry.Timestamp.ToString("HH:mm:ss")]</span>
+                <span class="log-text">@entry.Message</span>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public List<LogEntry> Entries { get; set; } = new();
+}

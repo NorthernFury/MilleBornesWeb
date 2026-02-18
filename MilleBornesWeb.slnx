@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="MilleBornesWeb.csproj" />
+  <Project Path="MilleBornesWeb.Tests/MilleBornesWeb.Tests.csproj" />
+</Solution>
