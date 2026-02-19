@@ -1,0 +1,52 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ master ] # Triggers whenever you push to master
+  workflow_dispatch:      # Allows you to trigger it manually for testing
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x # Or whatever version you are using
+
+      - name: Publish
+        run: dotnet publish MilleBornesWeb/MilleBornesWeb.csproj -c Release -o release --nologo
+
+      - name: Fix Base Href
+        # This changes <base href="/" /> to <base href="/YOUR_REPO_NAME/" />
+        # Replace 'MilleBornes' below with your actual GitHub Repository name
+        run: sed -i 's/<base href="\/" \/>/<base href="\/MilleBornes\/" \/>/g' release/wwwroot/index.html
+
+      - name: Copy index.html to 404.html
+        # Essential for Blazor SPAs to handle page refreshes on GitHub Pages
+        run: cp release/wwwroot/index.html release/wwwroot/404.html
+
+      - name: Add .nojekyll
+        # Tells GitHub not to run Jekyll, which would break the _framework folder
+        run: touch release/wwwroot/.nojekyll
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: release/wwwroot # Uploads the compiled game files
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
