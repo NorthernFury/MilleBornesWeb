@@ -24,7 +24,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x # Or whatever version you are using
+          dotnet-version: 10.0.x # Or whatever version you are using
 
       - name: Publish
         run: dotnet publish MilleBornesWeb/MilleBornesWeb.csproj -c Release -o release --nologo
