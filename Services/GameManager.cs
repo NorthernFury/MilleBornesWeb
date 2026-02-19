@@ -19,6 +19,8 @@ public class GameManager
     public string? ToastMessage { get; private set; }
     public bool ShowToast { get; private set; }
 
+    private CancellationTokenSource? _toastCts;
+
     private readonly Random _rng = new();
 
     public bool IsWaitingForCoupFourre { get; private set; }
@@ -385,13 +387,28 @@ public class GameManager
 
     public async void TriggerToast(string message)
     {
+        _toastCts?.Cancel();
+        _toastCts = new CancellationTokenSource();
+        var token = _toastCts.Token;
+
         ToastMessage = message;
         ShowToast = true;
         NotifyStateChanged();
 
-        // Auto-hide after 3 seconds
-        await Task.Delay(3000);
-        ShowToast = false;
-        NotifyStateChanged();
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(3000, token);
+
+                ShowToast = false;
+                NotifyStateChanged();
+            }
+            catch (OperationCanceledException)
+            {
+                // This is expected! It means a new toast was triggered 
+                // before this one finished. We just let this task die quietly.
+            }
+        }, token);
     }
 }
