@@ -273,4 +273,48 @@ public class RuleTests
         Assert.Equal(CardNames.Roll, player.BattlePile.Last().Name);
         Assert.True(player.CanMove); // Revealed Roll card allows movement
     }
+    [Fact]
+    public void CalculateScore_Should_Award_500_For_All_Safeties()
+    {
+        // Arrange
+        var game = new GameManager(null);
+        var player = game.Player;
+        player.DistanceCards.Add(new Card { Value = 100 });
+
+        // Add all 4 safeties
+        player.SafetyArea.Add(new Card { Name = CardNames.Safeties.RightOfWay });
+        player.SafetyArea.Add(new Card { Name = CardNames.Safeties.DrivingAce });
+        player.SafetyArea.Add(new Card { Name = CardNames.Safeties.ExtraTank });
+        player.SafetyArea.Add(new Card { Name = CardNames.Safeties.PunctureProof });
+
+        // Act
+        int score = game.CalculateRoundScore(player);
+
+        // Assert
+        // 100 (distance) + 400 (4 individual safeties) + 300 (all 4 bonus) = 1000
+        Assert.Equal(800, score);
+    }
+
+    [Fact]
+    public void CalculateScore_Should_Award_300_For_Delayed_Action()
+    {
+        // Arrange
+        var game = new GameManager(null);
+        var player = game.Player;
+        var ai = game.AI;
+
+        // Reach 1000km
+        for (int i = 0; i < 10; i++) player.DistanceCards.Add(new Card { Value = 100 });
+        ai.DistanceCards.Add(new Card { Value = 100 });
+
+        // Force deck to be empty
+        game.Deck.Clear();
+
+        // Act
+        int score = game.CalculateRoundScore(player);
+
+        // Assert
+        // 1000 (km) + 400 (Trip Complete) + 300 (Delayed Action) + 300 (Safe Trip - no 200km used) = 2000
+        Assert.Equal(2000, score);
+    }
 }

@@ -1,5 +1,6 @@
 ﻿@using MilleBornesWeb.Models
 @using MilleBornesWeb.Services
+@inject GameManager Game
 
 <div class="overlay">
     <div class="menu-card scoring-card">
@@ -14,13 +15,12 @@
             <div>@Player.TotalDistance</div>
             <div>@AI.TotalDistance</div>
 
-            <div>Safeties</div>
-            <div>+ @(Player.SafetyArea.Count * 100)</div>
-            <div>+ @(AI.SafetyArea.Count * 100)</div>
-
             <!-- Conditional Bonus Rows -->
+            @renderBonusRow("Safeties", Player.SafetyArea.Count * 100, AI.SafetyArea.Count * 100)
+            @renderBonusRow("All 4 Safeties Bonus", (Player.SafetyArea.Count == 4 ? 300 : 0), (AI.SafetyArea.Count == 4 ? 300 : 0))
             @renderBonusRow("Coup Fourrés", Player.CoupFourreCount * 300, AI.CoupFourreCount * 300)
             @renderBonusRow("Trip Completed", (Player.TotalDistance == 1000 ? 400 : 0), (AI.TotalDistance == 1000 ? 400 : 0))
+            @renderBonusRow("Delayed Action Bonus", (Player.TotalDistance == 1000 && Game.Deck.Count == 0 ? 300 : 0), (AI.TotalDistance == 1000 && Game.Deck.Count == 0 ? 300 : 0))
             @renderBonusRow("Shutout Bonus", CalculateShutout(Player), CalculateShutout(AI))
             @renderBonusRow("Safe Trip (No 200km)", CalculateSafeTrip(Player), CalculateSafeTrip(AI))
 
