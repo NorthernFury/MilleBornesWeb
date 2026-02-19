@@ -32,7 +32,7 @@ jobs:
       - name: Fix Base Href
         # This changes <base href="/" /> to <base href="/YOUR_REPO_NAME/" />
         # Replace 'MilleBornes' below with your actual GitHub Repository name
-        run: sed -i 's/<base href="\/" \/>/<base href="\/MilleBornes\/" \/>/g' release/wwwroot/index.html
+        run: sed -i 's/<base href="\/" \/>/<base href="\/MilleBornesWeb\/" \/>/g' release/wwwroot/index.html
 
       - name: Copy index.html to 404.html
         # Essential for Blazor SPAs to handle page refreshes on GitHub Pages
