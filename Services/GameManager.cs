@@ -16,6 +16,11 @@ public class GameManager
     public PlayerState AI { get; set; } = new() { Name = "AI Opponent" };
     public List<LogEntry> Logs { get; private set; } = [];
 
+    public string? ToastMessage { get; private set; }
+    public bool ShowToast { get; private set; }
+
+    private CancellationTokenSource? _toastCts;
+
     private readonly Random _rng = new();
 
     public bool IsWaitingForCoupFourre { get; private set; }
@@ -378,5 +383,36 @@ public class GameManager
         // Keep only the last 50 entries to prevent memory bloat
         if (Logs.Count > 50) Logs.RemoveAt(0);
         NotifyStateChanged();
+    }
+
+    public async Task TriggerToast(string message)
+    {
+        var oldCts = _toastCts;
+        _toastCts = new CancellationTokenSource();
+        
+        if (oldCts != null)
+        {
+            oldCts.Cancel();
+            oldCts.Dispose();
+        }
+
+        var token = _toastCts.Token;
+
+        ToastMessage = message;
+        ShowToast = true;
+        NotifyStateChanged();
+
+        try
+        {
+            await Task.Delay(3000, token);
+
+            ShowToast = false;
+            NotifyStateChanged();
+        }
+        catch (OperationCanceledException)
+        {
+            // This is expected! It means a new toast was triggered 
+            // before this one finished. We just let this task die quietly.
+        }
     }
 }

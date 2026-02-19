@@ -1,3 +1,15 @@
+:root {
+    /* Define base sizes based on screen height */
+    --card-h: 15vh;
+    --card-w: calc(var(--card-h) * 0.7);
+
+    --hand-h: 13vh;
+    --hand-w: calc(var(--hand-h) * 0.7);
+
+    --dist-h: calc(var(--card-h) * 0.5);
+    --dist-w: calc(var(--dist-h) * 0.7);
+}
+
 * {
     box-sizing: border-box;
 }
@@ -9,13 +21,15 @@
     background-color: #1e272e; /* Darker, more "table-like" blue */
     overflow: hidden;
     display: flex;
+    flex-direction: column;
     background-image: url("https://www.transparenttextures.com/patterns/dark-leather.png");
 }
 
 .layout-wrapper {
     display: flex;
+    flex: 1;
     width: 100%;
-    height: 100%;
+    overflow: hidden;
 }
 
 /* 2. The Board (Main Area) */
@@ -30,67 +44,88 @@
     box-shadow: inset 0 0 100px rgba(0,0,0,0.5);
 }
 
+.board-anchor {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+}
+
 .centered-content-wrapper {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     max-width: 1100px;
-    height: 100vh;
+    height: 100%;
     width: 100%;
     position: relative;
-    margin-left: 0px;
-    margin-right: 0;
+    margin: 0 auto;
 }
 
 .active-turn-glow {
-    box-shadow: 0 0 20px rgba(46, 204, 113, 0.4); /* Greenish glow */
+    width: 100%;
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.4);
     border: 1px solid #2ecc71 !important;
     transition: all 0.5s ease;
 }
 
-/* 3. The Rows - Tighten the Heights */
 .opponent-row {
+    flex: 0 1 25%;
     display: flex;
-    height: 25%;
-    position: relative;
+    align-items: center;
 }
 
 .center-row {
-    height: 20%;
+    height: 20vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 60px;
+    gap: calc(var(--card-w) * 0.2);
 }
 
 .player-row {
-    height: 45%;
+    flex: 0 1 50%;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
 }
 
 /* The Piles Layout*/
 .play-area {
     display: grid;
     /* Fixed widths so things don't jump around */
-    grid-template-columns: 200px 120px 120px 450px;
-    gap: 15px;
+    grid-template-columns: 1.2fr var(--card-w) var(--card-w) 3fr;
+    gap: 2vh;
     background: rgba(255, 255, 255, 0.05);
     padding: 15px;
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     margin: 0 auto;
-    width: fit-content;
-    height: 200px;
+    max-width: 1150px;
+    width: 100%;
 }
 
 /* Player Hand (Bottom of screen) */
 .hand-container {
     display: flex;
     justify-content: center;
+    margin-top: 1vh;
+    height: var(--hand-h);
     gap: 8px;
-    padding-top: 15px; /* Controls the gap between the piles and the hand */
+    padding-top: 15px;
+    max-width: 100%;
+    overflow: visible;
+}
+
+.hand-container .card-face {
+    width: var(--hand-w) !important;
+    height: var(--hand-h) !important;
+    font-size: calc(var(--hand-h) * 0.12) !important;
+}
+
+.hand-card-wrapper {
+    width: var(--hand-w);
+    height: var(--hand-h);
+    flex-shrink: 0;
 }
 
 .hand-card {
@@ -108,8 +143,8 @@
 /* The 3D Stack Effect */
 /* This is the 'footprint' on the table that never moves */
 .deck-slot {
-    width: 110px;
-    height: 160px;
+    width: var(--card-w) !important;
+    height: var(--card-h) !important;
     position: relative;
     display: flex;
     align-items: center;
@@ -119,11 +154,12 @@
 /* The actual card that will rise/sink */
 .deck-stack {
     position: absolute;
-    /* We lock the bottom-right as our anchor point */
     bottom: 0;
     right: 0;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     background-color: white;
+    width: 100% !important;
+    height: 100% !important;
 }
 
 /* Draw pile specific (Back of card) */
@@ -155,8 +191,8 @@
 
 .ai-badge {
     bottom: -15px;
-    right: 15px; /* Slight offset from the right edge */
-    top: auto; /* Reset the previous top property */
+    right: 15px;
+    top: auto;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -165,6 +201,8 @@
     border: 1px solid #f1c40f;
     box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     white-space: nowrap;
+    font-size: 0.85vh;
+    padding: 0.8vh 1.5vh;
 }
 
 .badge-separator {
@@ -197,9 +235,23 @@
     }
 }
 
+.card-slot, .deck-slot {
+    width: var(--card-w) !important;
+    height: var(--card-h) !important;
+    border: 2px dashed rgba(255,255,255,0.3);
+    border-radius: 8px;
+    background: rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 0;
+    overflow: visible;
+}
+
 .card-face {
-    width: 100px;
-    height: 140px;
+    width: 100%;
+    height: 100%;
     background: white;
     color: black;
     border-radius: 8px;
@@ -209,6 +261,7 @@
     justify-content: center;
     font-weight: bold;
     box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    box-sizing: border-box;
 }
 
 .deck-back {
@@ -216,16 +269,6 @@
     color: white !important;
     border: 3px solid #ecf0f1 !important;
     cursor: pointer;
-}
-
-.discard-highlight {
-    border: 3px solid #e74c3c !important; /* Red border */
-    filter: grayscale(0.5);
-}
-
-.discard-highlight:hover {
-    transform: translateY(10px) !important; /* Move down instead of up */
-    background: #f9ebea;
 }
 
 .overlay {
@@ -300,6 +343,45 @@
     opacity: 1;
 }
 
+.status-footer {
+    height: 40px;
+    width: 100%;
+    background: rgba(0,0,0,0.4);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    font-size: 0.8rem;
+    font-family: 'Consolas', monospace;
+    letter-spacing: 1px;
+}
+
+.footer-item .label {
+    color: #888;
+    margin-right: 5px;
+}
+
+.footer-item .value {
+    color: #fff;
+    font-weight: bold;
+}
+
+.p-score {
+    color: #2ecc71;
+    font-weight: bold;
+}
+
+.a-score {
+    color: #f1c40f;
+    font-weight: bold;
+}
+
+.divider {
+    margin: 0 10px;
+    color: #444;
+}
+
 .btn-action {
     width: 80%;
     padding: 8px;
@@ -307,7 +389,7 @@
     border-radius: 4px;
     font-weight: bold;
     cursor: pointer;
-    font-size: 0.8rem;
+    font-size: 1.1vh;
 }
 
 .btn-play {
