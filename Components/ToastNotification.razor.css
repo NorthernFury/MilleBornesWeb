@@ -1,0 +1,31 @@
+﻿.toast-wrapper {
+    position: fixed;
+    bottom: -100px; /* Hidden by default */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3000; /* Above all cards and overlays */
+    transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: none; /* Don't block clicks when hidden */
+}
+
+    .toast-wrapper.visible {
+        bottom: 40px; /* Slide up into view */
+    }
+
+.toast-content {
+    background: #e74c3c; /* Red alert color */
+    color: white;
+    padding: 12px 30px;
+    border-radius: 50px;
+    font-weight: bold;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border: 2px solid rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    white-space: nowrap;
+}
+
+.warning-icon {
+    font-size: 1.2rem;
+}

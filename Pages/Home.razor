@@ -83,6 +83,21 @@
         <!-- SIDEBAR LOG -->
         <GameLog Entries="Game.Logs" />
     </div>
+
+    <div class="status-footer">
+        <div class="footer-item">
+            <span class="label">ROUND GOAL:</span> <span class="value">1000 KM</span>
+        </div>
+        <div class="footer-item">
+            <span class="label">MATCH TOTALS:</span> 
+            <span class="p-score">YOU: @Game.Player.TotalScore</span> 
+            <span class="divider">|</span> 
+            <span class="a-score">AI: @Game.AI.TotalScore</span>
+        </div>
+    </div>
+
+    <ToastNotification />
+
     @if (!Game.GameStarted)
     {
         <div class="overlay">
@@ -184,7 +199,7 @@
         }
         else
         {
-            errorMessage = result.Message;
+            Game.TriggerToast(result.Message);
         }
     }
 

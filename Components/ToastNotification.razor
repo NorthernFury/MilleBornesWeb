@@ -1,0 +1,22 @@
+﻿@using MilleBornesWeb.Services
+@implements IDisposable
+@inject GameManager Game
+
+<div class="toast-wrapper @(Game.ShowToast ? "visible" : "")">
+    <div class="toast-content">
+        <span class="warning-icon">⚠️</span>
+        @Game.ToastMessage
+    </div>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Game.OnNotify += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        Game.OnNotify -= StateHasChanged;
+    }
+}

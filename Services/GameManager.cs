@@ -16,6 +16,9 @@ public class GameManager
     public PlayerState AI { get; set; } = new() { Name = "AI Opponent" };
     public List<LogEntry> Logs { get; private set; } = [];
 
+    public string? ToastMessage { get; private set; }
+    public bool ShowToast { get; private set; }
+
     private readonly Random _rng = new();
 
     public bool IsWaitingForCoupFourre { get; private set; }
@@ -377,6 +380,18 @@ public class GameManager
         Logs.Add(new LogEntry(message, DateTime.Now, owner));
         // Keep only the last 50 entries to prevent memory bloat
         if (Logs.Count > 50) Logs.RemoveAt(0);
+        NotifyStateChanged();
+    }
+
+    public async void TriggerToast(string message)
+    {
+        ToastMessage = message;
+        ShowToast = true;
+        NotifyStateChanged();
+
+        // Auto-hide after 3 seconds
+        await Task.Delay(3000);
+        ShowToast = false;
         NotifyStateChanged();
     }
 }
