@@ -3,6 +3,7 @@
     gap: 10px;
     justify-content: left;
     padding-top: 10px;
+    flex-wrap: wrap;
 }
 
 .small-scale {
@@ -18,8 +19,6 @@
 }
 
 .card-slot {
-    height: 140px;
-    width: 100px;
     border: 2px dashed rgba(255,255,255,0.2);
     background: rgba(0,0,0,0.2);
     border-radius: 8px;
@@ -33,17 +32,14 @@
     color: black;
     border: 2px solid #333;
     border-radius: 6px;
-    /* Center the text */
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
     padding: 5px;
-    /* Match the aesthetic of other cards */
     font-size: 0.75rem;
     font-weight: bold;
     box-shadow: 3px 3px 6px rgba(0,0,0,0.4);
-    /* Animation for when they appear */
     animation: popIn 0.3s ease-out;
 }
 
@@ -71,13 +67,13 @@
 }
 
 .distance-overlap {
-    height: 50px !important; /* Tall enough to feel like a card */
-    width: 70px !important;
-    margin-top: -25px; /* Shows exactly the top 25px of the card beneath */
+    height: var(--dist-h) !important;
+    width: var(--dist-w) !important;
+    margin-top: calc(var(--dist-h) * -0.85);
     background: white;
     border: 1px solid #000;
     border-radius: 6px;
-    font-size: 1.1rem;
+    font-size: calc(var(--dist-h) * 0.2); /* Scalable font */
     z-index: 1;
 }
 
@@ -102,15 +98,9 @@
     margin-bottom: 10px;
     border: 1px solid #2ecc71;
     color: #2ecc71;
-    font-size: 0.8rem;
+    font-size: 1vh;
     font-weight: bold;
     text-transform: uppercase;
-}
-
-/* Every card AFTER the first one in a stack gets pulled UP */
-/* This creates the fan-down effect where older cards peek out from the top */
-.distance-stack .distance-overlap:not(:first-child) {
-    margin-top: -40px; /* Adjust this number to show more/less of the card behind */
 }
 
 /* Ensure the cards overlap correctly (newer cards on top) */

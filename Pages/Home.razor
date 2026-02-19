@@ -11,7 +11,7 @@
             <div class="centered-content-wrapper">
                 <!-- AI SECTION -->
                 <div class="opponent-row">
-                    <div style="width: fit-content; margin: 0 auto; position: relative;">
+                    <div class="board-anchor">
                        <div class="status-badge ai-badge @(Game.CurrentTurn == TurnOwner.AI ? "thinking-glow" : "")">
                             @if (Game.CurrentTurn == TurnOwner.AI)
                             {
@@ -24,7 +24,7 @@
                             <span class="badge-separator">|</span>
                             <span>CARDS: @Game.AI.Hand.Count</span>
                         </div>
-                        <div class="@(Game.CurrentTurn == TurnOwner.AI ? "active-turn-glow" : "")" style="border-radius: 12px;">
+                        <div class="@(Game.CurrentTurn == TurnOwner.AI ? "active-turn-glow" : "")" style="border-radius: 12px; width: 100%;">
                             <PlayerBoard State="Game.AI" IsSmall="false" />
                         </div>
                     </div>
@@ -52,14 +52,10 @@
 
                 <!-- PLAYER SECTION -->
                 <div class="player-row">
-                    <div class="@(Game.CurrentTurn == TurnOwner.Player ? "active-turn-glow" : "")" style="margin: 0 auto; border-radius: 12px;">
-                        <!--<div class="controls-bar" style="margin-bottom: 0; border-radius: 8px 8px 0 0;">
-                            <div class="turn-indicator">
-                                @(Game.CurrentTurn == TurnOwner.Player ? "YOUR TURN" : "AI IS THINKING...") - <strong>@Game.CurrentPhase</strong>
-                            </div>
-                        </div>-->
-
-                        <PlayerBoard State="Game.Player" IsSmall="false" />
+                    <div class="board-anchor">
+                        <div class="@(Game.CurrentTurn == TurnOwner.Player ? "active-turn-glow" : "")" style="margin: 0 auto; border-radius: 12px; width: 100%;">
+                            <PlayerBoard State="Game.Player" IsSmall="false" />
+                        </div>
                     </div>
                     <div class="hand-container">
                         @foreach (var card in Game.Player.Hand)
