@@ -385,30 +385,34 @@ public class GameManager
         NotifyStateChanged();
     }
 
-    public async void TriggerToast(string message)
+    public async Task TriggerToast(string message)
     {
-        _toastCts?.Cancel();
+        var oldCts = _toastCts;
         _toastCts = new CancellationTokenSource();
+        
+        if (oldCts != null)
+        {
+            oldCts.Cancel();
+            oldCts.Dispose();
+        }
+
         var token = _toastCts.Token;
 
         ToastMessage = message;
         ShowToast = true;
         NotifyStateChanged();
 
-        _ = Task.Run(async () =>
+        try
         {
-            try
-            {
-                await Task.Delay(3000, token);
+            await Task.Delay(3000, token);
 
-                ShowToast = false;
-                NotifyStateChanged();
-            }
-            catch (OperationCanceledException)
-            {
-                // This is expected! It means a new toast was triggered 
-                // before this one finished. We just let this task die quietly.
-            }
-        }, token);
+            ShowToast = false;
+            NotifyStateChanged();
+        }
+        catch (OperationCanceledException)
+        {
+            // This is expected! It means a new toast was triggered 
+            // before this one finished. We just let this task die quietly.
+        }
     }
 }

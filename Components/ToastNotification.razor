@@ -12,11 +12,16 @@
 @code {
     protected override void OnInitialized()
     {
-        Game.OnNotify += StateHasChanged;
+        Game.OnNotify += OnGameNotify;
     }
 
     public void Dispose()
     {
-        Game.OnNotify -= StateHasChanged;
+        Game.OnNotify -= OnGameNotify;
+    }
+
+    private void OnGameNotify()
+    {
+        _ = InvokeAsync(StateHasChanged);
     }
 }

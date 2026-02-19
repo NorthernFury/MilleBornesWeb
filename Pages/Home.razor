@@ -149,8 +149,6 @@
 </div>
 
 @code {
-    private string errorMessage = "";
-
     protected override void OnInitialized() => Game.OnNotify += StateHasChanged;
     public void Dispose() => Game.OnNotify -= StateHasChanged;
 
@@ -193,19 +191,17 @@
 
         if (result)
         {
-            errorMessage = "";
             Game.AddLog($"You played {card.Name}.", TurnOwner.Player);
             Game.ExecuteMove(card, Game.Player, target);
         }
         else
         {
-            Game.TriggerToast(result.Message);
+            _ = Game.TriggerToast(result.Message);
         }
     }
 
     private void HandleDiscard(Card card)
     {
-        errorMessage = "";
         Game.DiscardCard(card, Game.Player);
     }
 
